@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/DailyAww/bin
+/DailyAww/obj
+*.suo
+/DailyAww/Services/oldMiAww.cs
+/.JustCode/DailyAww.solution-user.settings.xml
+/packages
+/DailyAww/Properties/PublishProfiles
