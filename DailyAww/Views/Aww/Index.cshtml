@@ -1,0 +1,67 @@
+﻿@model DailyAww.Models.OnDemandAwwViewModel
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>On Demand Awws!</h3>
+            <p>Select from the list of people in the Database, and the DailyAww app will send them a short top 5 trending cute posts.</p>
+            @using (Html.BeginForm("OnDemand", "Aww", Model, FormMethod.Post, new { @id = "InstantAwwForm" }))
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        @*@for (var i = 0; i < Model.ModelList.Count(); i++)
+                        {
+                            <div class="col-md-3">
+                                @Html.HiddenFor(x => x.ModelList[i].PersonId)
+                                @Html.EditorFor(x => x.ModelList[i].Selected, new { @checked = "checked", @class = "PersonSelected" })
+                                @Html.Label(Model.ModelList[i].PersonName)
+                            </div>
+                        }*@
+                        @foreach (var item in Model.ModelList)
+                        {
+                            <div class="col-md-3">
+                                @Html.HiddenFor(i => item.PersonId)
+                                @Html.EditorFor(x => item.Selected, new { @checked = "checked", @class = "PersonSelected" })
+                                @Html.Label(item.PersonName)
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 ">
+                        @Html.EditorFor(x => x.CustomEmail, new { htmlAttributes = new { @class = "form-control", placeholder = "Custom Email" } })
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-success">Send!</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-primary" id="SelectAll">Select All</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-info" id="ClearSelection">Clear Selection</button>
+                    </div>
+                    <div class="col-md-3">
+                        @Html.ActionLink("Cancel", "Index", "Home", new { @class = "btn btn-default" })
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $().ready(function () {
+        $("#SelectAll").bind('click',
+            function () {
+                $(".PersonSelected").prop('checked', true);
+            });
+        $("#ClearSelection").bind('click',
+            function () {
+                $(".PersonSelected").prop('checked', false);
+            });
+    });
+</script>

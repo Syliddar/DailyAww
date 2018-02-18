@@ -1,0 +1,51 @@
+﻿@model List<DailyAww.Models.Person>
+
+<div class="container-fluid" id="PersonTable">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped table-hover" id="PeopleTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email Address</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var person in Model)
+                    {
+                        <tr>
+                            <td>@person.Name</td>
+                            <td>@person.EmailAddress</td>
+                            <td>
+                                <div class="pull-right">
+                                    @Html.ActionLink("Edit", "Edit", "People", new { @id = person.Id }, new { @class = "btn btn-default" })
+                                    <button type="button" class="btn btn-danger" onclick="Delete(@person.Id)">Remove</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @Html.ActionLink("Add New Person", "Create", "People", new { @class = "btn btn-primary" })
+        </div>
+    </div>
+</div>
+
+<script>
+    function Delete(id) {
+        if (confirm("Are you sure you want to delete this person?")) {
+            $.ajax({
+                url: '/People/Remove/',
+                type: 'POST',
+                data: { id: id },
+                error: function (data) {
+                    alert("An error has occurred. Please try again later.");
+                },
+                success: function (data) {
+                    $("#PersonTable").replaceWith(data);
+                }
+            });
+        }
+    }
+</script>
