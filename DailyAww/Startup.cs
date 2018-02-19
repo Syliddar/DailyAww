@@ -20,6 +20,8 @@ namespace DailyAww
             app.UseHangfireServer();
             
             ConfigureAuth(app);
+
+            
         }
     }
 }

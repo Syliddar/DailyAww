@@ -14,9 +14,9 @@ namespace DailyAww.Controllers
     {
         private readonly IContextService _context;
 
-        public PeopleController()
+        public PeopleController(IContextService contextService)
         {
-            _context = new ContextService();
+            _context = contextService;
         }
         // GET: People
         public ActionResult Index()

@@ -16,11 +16,11 @@ namespace DailyAww.Controllers
         private readonly IAwwService _aww;
         private readonly ICommunicationService _comm;
 
-        public AwwController()
+        public AwwController(IContextService contextService, IAwwService awwService, ICommunicationService commsService)
         {
-            _context = new ContextService();
-            _aww = new AwwService();
-            _comm = new CommunicationService();
+            _context = contextService;
+            _aww = awwService;
+            _comm = commsService;
         }
 
         [HttpGet]

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using DailyAww.Interfaces;
 using DailyAww.Models;
-using DailyAww.Services;
 using Hangfire;
 
 namespace DailyAww.Controllers
@@ -15,9 +10,9 @@ namespace DailyAww.Controllers
         private readonly IAwwService _aww;
         // GET: Schedule
 
-        public ScheduleController()
+        public ScheduleController(IAwwService awwService)
         {
-            _aww = new AwwService();
+            _aww = awwService;
         }
         public ActionResult Index()
         {
