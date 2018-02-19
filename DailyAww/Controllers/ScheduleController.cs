@@ -35,7 +35,7 @@ namespace DailyAww.Controllers
                     RecurringJob.AddOrUpdate(() => _aww.GetWeeklyAwws(), viewModel.CronExpression, viewModel.TimeZoneInfo);
                     break;
             }
-            return View();
+            return View("Index");
         }
     }
 }

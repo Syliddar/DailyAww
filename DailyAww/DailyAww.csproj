@@ -288,7 +288,7 @@
     <Content Include="Views\People\Index.cshtml" />
     <Content Include="Views\People\Update.cshtml" />
     <Content Include="Views\Aww\Index.cshtml" />
-    <Content Include="Views\Schedule\View.cshtml" />
+    <Content Include="Views\Schedule\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
