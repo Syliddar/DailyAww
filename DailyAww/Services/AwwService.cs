@@ -89,15 +89,13 @@ namespace DailyAww.Services
             var web = new HtmlWeb();
             var doc = web.Load(url);
             var nodes = doc.DocumentNode.SelectNodes("//a").Where(n=>n.InnerText.Contains("Parent Directory") == false);
-            foreach (var htmlNode in nodes)
+            if (nodes.Any())
             {
-                var post = new Post()
+                result.AddRange(nodes.Select(htmlNode => new Post()
                 {
                     //Title = htmlNode.InnerText,
-                    Title = "This is a Test of the Manual Aww Input system. Also, this is Lucy.  -Jason",
-                    Url = new Uri(url + htmlNode.Attributes["href"].Value)
-                };
-                result.Add(post);
+                    Title = "This is a Test of the Manual Aww Input system. Also, this is Lucy, Ivonne's new puppy.  -Jason", Url = new Uri(url + htmlNode.Attributes["href"].Value)
+                }));
             }
             return result;
         }

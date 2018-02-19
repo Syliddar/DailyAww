@@ -18,11 +18,7 @@ namespace DailyAww
 
             app.UseHangfireDashboard();
             app.UseHangfireServer();
-
-            if (!EventLog.SourceExists("DailyAww"))
-            {
-                EventLog.CreateEventSource("DailyAww", "DailyAwwLog");
-            }
+            
             ConfigureAuth(app);
         }
     }
