@@ -1,21 +1,20 @@
-﻿using DailyAww.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using DailyAww.Models;
-using System.Net.Mail;
-using System.Net;
 using System.Configuration;
+using System.Net;
+using System.Net.Mail;
+using DailyAww.Models;
 using DailyAww.Services.Interfaces;
 
 namespace DailyAww.Services
 {
     public class CommunicationService : ICommunicationService
     {
-        private readonly string _serviceAddress;
-        private readonly string _servicePassword;
-        private readonly string _serviceClient;
-        private readonly int _servicePort;
         private readonly IContextService _context;
+        private readonly string _serviceAddress;
+        private readonly string _serviceClient;
+        private readonly string _servicePassword;
+        private readonly int _servicePort;
 
         public CommunicationService(IContextService context)
         {
@@ -35,10 +34,7 @@ namespace DailyAww.Services
                 Subject = subject,
                 IsBodyHtml = true
             };
-            foreach (var person in peopleList)
-            {
-                awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
-            }
+            foreach (var person in peopleList) awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
             SmtpClientSend(awwMail);
         }
 
@@ -65,10 +61,7 @@ namespace DailyAww.Services
                 Subject = subject,
                 IsBodyHtml = true
             };
-            foreach (var person in personList)
-            {
-                awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
-            }
+            foreach (var person in personList) awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
             SmtpClientSend(awwMail);
         }
 
