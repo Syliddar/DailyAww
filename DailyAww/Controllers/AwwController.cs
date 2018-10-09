@@ -80,5 +80,20 @@ namespace DailyAww.Controllers
             string subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
             _comm.SendAwws(emailBody, subject, people);
         }
+
+        [HttpPost]
+        public HttpStatusCodeResult Test()
+        {
+            try
+            {
+                string emailbody = _aww.GetDailyAwws();
+                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress("Jason.Myers8@gmail.com"));
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }
