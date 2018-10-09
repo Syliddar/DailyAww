@@ -1,94 +1,85 @@
 ﻿using DailyAww.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using DailyAww.Models;
 using System.Net.Mail;
-using RedditSharp.Things;
 using System.Net;
 using System.Configuration;
-using System.Diagnostics;
+using DailyAww.Services.Interfaces;
 
 namespace DailyAww.Services
 {
     public class CommunicationService : ICommunicationService
     {
-        private readonly string ServiceAddress;
-        private readonly string ServicePassword;
-        private readonly string ServiceClient;
-        private readonly int ServicePort;
+        private readonly string _serviceAddress;
+        private readonly string _servicePassword;
+        private readonly string _serviceClient;
+        private readonly int _servicePort;
+        private readonly IContextService _context;
 
-        public CommunicationService()
+        public CommunicationService(IContextService context)
         {
-            ServiceAddress = ConfigurationManager.AppSettings["ServiceAddress"];
-            ServicePassword = ConfigurationManager.AppSettings["ServicePassword"];
-            ServiceClient = ConfigurationManager.AppSettings["ServiceClient"];
-            ServicePort = Convert.ToInt32(ConfigurationManager.AppSettings["ServicePort"]);
+            _context = context;
+            _serviceAddress = ConfigurationManager.AppSettings["ServiceAddress"];
+            _servicePassword = ConfigurationManager.AppSettings["ServicePassword"];
+            _serviceClient = ConfigurationManager.AppSettings["ServiceClient"];
+            _servicePort = Convert.ToInt32(ConfigurationManager.AppSettings["ServicePort"]);
         }
 
-        public void SendAwws(string message, string Subject, List<Person> peopleList)
+        public void SendAwws(string message, string subject, IEnumerable<Person> peopleList)
         {
-            var AwwMail = new MailMessage
+            var awwMail = new MailMessage
             {
-                From = new MailAddress(ServiceAddress),
+                From = new MailAddress(_serviceAddress),
                 Body = message,
-                Subject = Subject,
+                Subject = subject,
                 IsBodyHtml = true
             };
             foreach (var person in peopleList)
             {
-                AwwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
+                awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
             }
-            SmtpClientSend(AwwMail);
+            SmtpClientSend(awwMail);
         }
 
-        public void SendAwws(string message, string Subject, MailAddress CustomAddress)
+        public void SendAwws(string message, string subject, MailAddress customAddress)
         {
-            var AwwMail = new MailMessage
+            var awwMail = new MailMessage
             {
-                From = new MailAddress(ServiceAddress),
+                From = new MailAddress(_serviceAddress),
                 Body = message,
-                Subject = Subject,
+                Subject = subject,
                 IsBodyHtml = true
             };
-            AwwMail.To.Add(CustomAddress);
-#if DEBUG
-            EventLog eventLog = new EventLog {Source = "DailyAwwLog"};
-            eventLog.WriteEntry(AwwMail.To.ToString(), EventLogEntryType.Information);
-            eventLog.WriteEntry(AwwMail.Body, EventLogEntryType.Information);
-#else
-            SmtpClientSend(AwwMail);
-#endif
-
+            awwMail.To.Add(customAddress);
+            SmtpClientSend(awwMail);
         }
 
-        public void SendAwws(string message, string Subject, List<int> personIdList)
+        public void SendAwws(string message, string subject, List<int> personIdList)
         {
-            var AwwMail = new MailMessage
+            var personList = _context.GetPeople(personIdList);
+            var awwMail = new MailMessage
             {
-                From = new MailAddress(ServiceAddress),
+                From = new MailAddress(_serviceAddress),
                 Body = message,
-                Subject = Subject,
+                Subject = subject,
                 IsBodyHtml = true
             };
-            var _db = new ApplicationDbContext();
-            foreach (var personId in personIdList)
+            foreach (var person in personList)
             {
-                var person = _db.People.Find(personId);
-                AwwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
+                awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
             }
-            SmtpClientSend(AwwMail);
+            SmtpClientSend(awwMail);
         }
 
-        private void SmtpClientSend(MailMessage AwwMail)
+        private void SmtpClientSend(MailMessage awwMail)
         {
-            var client = new SmtpClient(ServiceClient, ServicePort)
+            var client = new SmtpClient(_serviceClient, _servicePort)
             {
-                Credentials = new NetworkCredential(ServiceAddress, ServicePassword),
+                Credentials = new NetworkCredential(_serviceAddress, _servicePassword),
                 EnableSsl = true
             };
-            //client.Send(AwwMail);
+            client.Send(awwMail);
         }
     }
 }

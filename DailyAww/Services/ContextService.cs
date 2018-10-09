@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using DailyAww.Models;
+using DailyAww.Services.Interfaces;
 
 namespace DailyAww.Services
 {
@@ -24,6 +25,11 @@ namespace DailyAww.Services
         public Person GetPerson(int id)
         {
             return _db.People.Find(id);
+        }
+
+        public List<Person> GetPeople(List<int> peopleIds)
+        {
+            return _db.People.Where(x => peopleIds.Contains(x.Id)).ToList();
         }
 
         public void SavePerson(Person person)

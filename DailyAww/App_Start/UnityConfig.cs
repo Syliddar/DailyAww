@@ -3,6 +3,7 @@ using DailyAww.Controllers;
 using DailyAww.Interfaces;
 using DailyAww.Models;
 using DailyAww.Services;
+using DailyAww.Services.Interfaces;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Unity;
