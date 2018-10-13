@@ -1,20 +1,19 @@
-﻿using DailyAww.Interfaces;
-using DailyAww.Models;
-using DailyAww.Services;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
-using System.Web;
 using System.Web.Mvc;
+using DailyAww.Interfaces;
+using DailyAww.Models;
+using DailyAww.Services.Interfaces;
 
 namespace DailyAww.Controllers
 {
     public class AwwController : Controller
     {
-        private readonly IContextService _context;
         private readonly IAwwService _aww;
         private readonly ICommunicationService _comm;
+        private readonly IContextService _context;
 
         public AwwController(IContextService contextService, IAwwService awwService, ICommunicationService commsService)
         {
@@ -29,7 +28,7 @@ namespace DailyAww.Controllers
         {
             var model = new OnDemandAwwViewModel();
             model.ModelList = _context.GetAllPeople()
-                .Select(x => new OnDemandListItem()
+                .Select(x => new OnDemandListItem
                 {
                     Selected = false,
                     PersonId = x.Id,
@@ -43,40 +42,53 @@ namespace DailyAww.Controllers
         [HttpPost]
         public ActionResult OnDemand(OnDemandAwwViewModel model)
         {
-
-            string emailBody = _aww.GetHourlyAwws();
-            string subject = "Emergency Awwws for You!";
-            List<int> personIdList = model.ModelList.Where(x => x.Selected == true)
+            var emailBody = _aww.GetHourlyAwws();
+            var subject = "Emergency Awwws for You!";
+            var personIdList = model.ModelList.Where(x => x.Selected)
                 .Select(x => x.PersonId)
                 .ToList();
             _comm.SendAwws(emailBody, subject, personIdList);
             if (ModelState.IsValidField("CustomEmail"))
-            {
                 if (!string.IsNullOrEmpty(model.CustomEmail))
                 {
                     var address = new MailAddress(model.CustomEmail);
                     _comm.SendAwws(emailBody, subject, address);
                 }
-            }
+
             return RedirectToAction("Index", "Home");
         }
-        
+
         [HttpPost]
         public void DailyAwws()
         {
-            List<Person> people = _context.GetAllPeople();
-            string emailBody = _aww.GetDailyAwws();
-            string subject = "Awwws for " + DateTime.Today.Date.ToShortDateString();
+            var people = _context.GetAllPeople();
+            var emailBody = _aww.GetDailyAwws();
+            var subject = "Awwws for " + DateTime.Today.Date.ToShortDateString();
             _comm.SendAwws(emailBody, subject, people);
         }
-        
+
         [HttpPost]
         public void WeeklyAwws()
         {
-            List<Person> people = _context.GetAllPeople();
-            string emailBody = _aww.GetWeeklyAwws();
-            string subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
+            var people = _context.GetAllPeople();
+            var emailBody = _aww.GetWeeklyAwws();
+            var subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
             _comm.SendAwws(emailBody, subject, people);
+        }
+
+        [HttpPost]
+        public HttpStatusCodeResult Test()
+        {
+            try
+            {
+                var emailbody = _aww.GetDailyAwws();
+                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress("Jason.Myers8@gmail.com"));
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }

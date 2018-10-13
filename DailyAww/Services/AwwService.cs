@@ -1,22 +1,22 @@
-﻿using DailyAww.Interfaces;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Web;
+using System.Web.Configuration;
+using DailyAww.Interfaces;
+using HtmlAgilityPack;
 using RedditSharp;
 using RedditSharp.Things;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Web.Configuration;
-using HtmlAgilityPack;
 
 namespace DailyAww.Services
 {
     public class AwwService : IAwwService
     {
+        private readonly Subreddit _aww;
         private HttpClient _client;
-        private Subreddit _aww;
+
         public AwwService()
         {
             _client = new HttpClient();
@@ -27,10 +27,13 @@ namespace DailyAww.Services
         public string GetDailyAwws()
         {
             var list = GetManualAww();
-            list.AddRange(_aww.GetTop(FromTime.Day).Where(x => x.Url.ToString().Contains(".jpg")).Take(25));
+            list.AddRange(_aww.GetTop(FromTime.Day).Where(x =>
+                x.Url.AbsoluteUri.EndsWith(".jpg") || x.Url.AbsoluteUri.EndsWith(".png") ||
+                x.Url.AbsoluteUri.EndsWith(".gif")).Take(15));
             list = FilterUndesirableAwws(list);
-            return ParsePostsIntoEmailBody(list, 10); 
+            return ParsePostsIntoEmailBody(list, 10);
         }
+
         public string GetHourlyAwws()
         {
             var list = GetManualAww();
@@ -47,58 +50,60 @@ namespace DailyAww.Services
             return ParsePostsIntoEmailBody(filteredList, 12);
         }
 
-        private List<Post> FilterUndesirableAwws(List<Post> list)
+        private static List<Post> FilterUndesirableAwws(IEnumerable<Post> list)
         {
             var result = new List<Post>();
             foreach (var post in list)
             {
-                if (PassesCuteFilter(post))
-                {
-                    result.Add(post);
-                }
+                if (!IsAcceptableFileType(post)) continue;
+                if (PassesCuteFilter(post)) result.Add(post);
             }
+
             return result;
         }
+
         private static bool PassesCuteFilter(Post post)
         {
             if (post.Title.IndexOf("snake", StringComparison.OrdinalIgnoreCase) >= 0) return false;
             if (post.Title.IndexOf("snek", StringComparison.OrdinalIgnoreCase) >= 0) return false;
-            if (post.Title.IndexOf("noodle", StringComparison.OrdinalIgnoreCase) >= 0) return false;
-            return true;
+            return post.Title.IndexOf("noodle", StringComparison.OrdinalIgnoreCase) < 0;
         }
-        
-        private string ParsePostsIntoEmailBody(List<Post> list, int awwCount)
+
+        private static string ParsePostsIntoEmailBody(List<Post> list, int awwCount)
         {
-            var path = System.Web.HttpContext.Current.Server.MapPath("~/Views/Aww/EmailTemplate.html");
+            var path = HttpContext.Current.Server.MapPath("~/Views/Aww/EmailTemplate.html");
             var result = File.ReadAllText(path);
             var awwTable = "";
             foreach (var post in list.Take(awwCount).OrderBy(l => Guid.NewGuid()).ToList())
-            {
                 awwTable += "<h3>" + post.Title + "</h3><img src='" + post.Url + "' /><hr />";
-            }
+
             awwTable.Remove(awwTable.LastIndexOf("<hr />", StringComparison.Ordinal));
             //EmailTemplate.Html includes an <AWWS /> tag, which we are replacing with our content
             result = result.Replace("<AWWS />", awwTable);
             return result;
         }
 
-        private List<Post> GetManualAww()
+        private static bool IsAcceptableFileType(Post post)
+        {
+            return post.Url.ToString().EndsWith(".jpg") || post.Url.ToString().EndsWith(".png");
+        }
+
+        private static List<Post> GetManualAww()
         {
             var result = new List<Post>();
             var url = WebConfigurationManager.AppSettings["ManualAwwUrl"];
             var web = new HtmlWeb();
             var doc = web.Load(url);
-            var nodes = doc.DocumentNode.SelectNodes("//a").Where(n=>n.InnerText.Contains("Parent Directory") == false);
+            var nodes = doc.DocumentNode.SelectNodes("//a")
+                .Where(n => n.InnerText.Contains("Parent Directory") == false);
             if (nodes.Any())
-            {
-                result.AddRange(nodes.Select(htmlNode => new Post()
+                result.AddRange(nodes.Select(htmlNode => new Post
                 {
-                    //Title = htmlNode.InnerText,
-                    Title = "This is a Test of the Manual Aww Input system. Also, this is Lucy, Ivonne's new puppy.  -Jason", Url = new Uri(url + htmlNode.Attributes["href"].Value)
+                    Title = htmlNode.InnerText,
+                    Url = new Uri(url + htmlNode.Attributes["href"].Value)
                 }));
-            }
+
             return result;
         }
-
     }
 }

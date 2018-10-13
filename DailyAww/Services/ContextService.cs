@@ -1,9 +1,8 @@
-﻿using DailyAww.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Web;
 using DailyAww.Models;
+using DailyAww.Services.Interfaces;
 
 namespace DailyAww.Services
 {
@@ -16,6 +15,7 @@ namespace DailyAww.Services
         {
             _db = new ApplicationDbContext();
         }
+
         public List<Person> GetAllPeople()
         {
             return _db.People.ToList();
@@ -24,6 +24,11 @@ namespace DailyAww.Services
         public Person GetPerson(int id)
         {
             return _db.People.Find(id);
+        }
+
+        public List<Person> GetPeople(List<int> peopleIds)
+        {
+            return _db.People.Where(x => peopleIds.Contains(x.Id)).ToList();
         }
 
         public void SavePerson(Person person)
@@ -37,11 +42,12 @@ namespace DailyAww.Services
                 else
                 {
                     _db.People.Attach(person);
-                    _db.Entry(person).State = System.Data.Entity.EntityState.Modified;
+                    _db.Entry(person).State = EntityState.Modified;
                 }
+
                 _db.SaveChanges();
             }
-            catch 
+            catch
             {
                 //Return Error Message at some point                
             }
@@ -59,7 +65,6 @@ namespace DailyAww.Services
             {
                 //Return Error Message at some point                
             }
-
         }
     }
 }

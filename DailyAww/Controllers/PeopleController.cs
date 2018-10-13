@@ -1,11 +1,6 @@
-﻿using DailyAww.Interfaces;
+﻿using System.Web.Mvc;
 using DailyAww.Models;
-using DailyAww.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using DailyAww.Services.Interfaces;
 
 namespace DailyAww.Controllers
 {
@@ -18,6 +13,7 @@ namespace DailyAww.Controllers
         {
             _context = contextService;
         }
+
         // GET: People
         public ActionResult Index()
         {
@@ -46,9 +42,10 @@ namespace DailyAww.Controllers
                 _context.SavePerson(person);
                 return RedirectToAction("Index");
             }
+
             return RedirectToAction("Index");
         }
-        
+
         [HttpPost]
         public ActionResult Remove(int id)
         {

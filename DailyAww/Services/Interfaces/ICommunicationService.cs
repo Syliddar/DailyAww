@@ -1,15 +1,13 @@
-﻿using DailyAww.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net.Mail;
-using System.Web;
+using DailyAww.Models;
 
-namespace DailyAww.Interfaces
+namespace DailyAww.Services.Interfaces
 {
     public interface ICommunicationService
     {
-        void SendAwws(string message, string Subject, List<Person> peopleList);
-        void SendAwws(string message, string Subject, MailAddress address);
-        void SendAwws(string message, string Subject, List<int> personIdList);}
+        void SendAwws(string message, string subject, MailAddress customAddress);
+        void SendAwws(string message, string subject, List<int> personIdList);
+        void SendAwws(string message, string subject, IEnumerable<Person> peopleList);
+    }
 }
