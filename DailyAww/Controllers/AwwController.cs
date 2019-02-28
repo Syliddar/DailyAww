@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using DailyAww.Interfaces;
 using DailyAww.Models;
@@ -34,8 +35,7 @@ namespace DailyAww.Controllers
                     Selected = false,
                     PersonId = x.Id,
                     PersonName = x.Name
-                })
-                .ToList();
+                }).ToList();
             return View(model);
         }
 
@@ -83,7 +83,7 @@ namespace DailyAww.Controllers
             try
             {
                 var emailbody = _aww.GetAwws(FromTime.Hour);
-                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress("Jason.Myers8@gmail.com"));
+                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress(WebConfigurationManager.AppSettings["TestEmail"]));
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
             catch (Exception ex)
