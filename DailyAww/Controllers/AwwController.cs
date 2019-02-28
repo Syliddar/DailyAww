@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using DailyAww.Interfaces;
 using DailyAww.Models;
 using DailyAww.Services.Interfaces;
+using RedditSharp.Things;
 
 namespace DailyAww.Controllers
 {
@@ -42,7 +43,7 @@ namespace DailyAww.Controllers
         [HttpPost]
         public ActionResult OnDemand(OnDemandAwwViewModel model)
         {
-            var emailBody = _aww.GetHourlyAwws();
+            var emailBody = _aww.GetAwws(FromTime.Hour);
             var subject = "Emergency Awwws for You!";
             var personIdList = model.ModelList.Where(x => x.Selected)
                 .Select(x => x.PersonId)
@@ -62,7 +63,7 @@ namespace DailyAww.Controllers
         public void DailyAwws()
         {
             var people = _context.GetAllPeople();
-            var emailBody = _aww.GetDailyAwws();
+            var emailBody = _aww.GetAwws(FromTime.Day);
             var subject = "Awwws for " + DateTime.Today.Date.ToShortDateString();
             _comm.SendAwws(emailBody, subject, people);
         }
@@ -71,7 +72,7 @@ namespace DailyAww.Controllers
         public void WeeklyAwws()
         {
             var people = _context.GetAllPeople();
-            var emailBody = _aww.GetWeeklyAwws();
+            var emailBody = _aww.GetAwws(FromTime.Week);
             var subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
             _comm.SendAwws(emailBody, subject, people);
         }
@@ -81,7 +82,7 @@ namespace DailyAww.Controllers
         {
             try
             {
-                var emailbody = _aww.GetDailyAwws();
+                var emailbody = _aww.GetAwws(FromTime.Hour);
                 _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress("Jason.Myers8@gmail.com"));
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
