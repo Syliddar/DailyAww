@@ -82,8 +82,8 @@ namespace DailyAww.Controllers
         {
             try
             {
-                var emailbody = _aww.GetAwws(FromTime.Hour);
-                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress(WebConfigurationManager.AppSettings["TestEmail"]));
+                var emailbody = _aww.GetAwws(FromTime.Week);
+                _comm.SendAwws(emailbody, "Test Aww Message: " + Guid.NewGuid(), new MailAddress(WebConfigurationManager.AppSettings["TestEmail"]));
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
             catch (Exception ex)
