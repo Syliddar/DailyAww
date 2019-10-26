@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Net.Http;
+using System.Web;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Web;
 using System.Web.Configuration;
 using DailyAww.Interfaces;
 using HtmlAgilityPack;
 using RedditSharp;
 using RedditSharp.Things;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace DailyAww.Services
 {
@@ -37,15 +41,22 @@ namespace DailyAww.Services
 
         private static List<Post> FilterUndesirableAwws(IEnumerable<Post> list)
         {
-            return list.Where(PassesCuteFilter).ToList();
+            var result = new List<Post>();
+            foreach (var post in list)
+            {
+                if (!IsAcceptableFileType(post)) continue;
+                if (PassesCuteFilterAsync(post)) result.Add(post);
+            }
+
+            return result;
         }
 
-        private static bool PassesCuteFilter(Post post)
+        private static bool PassesCuteFilterAsync(Post post)
         {
-            bool result = !(post.Title.IndexOf("snake", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (post.Title.IndexOf("snek", StringComparison.OrdinalIgnoreCase) >= 0) result = false;
-            if (post.Title.IndexOf("noodle", StringComparison.OrdinalIgnoreCase) >= 0) result = false;
-            return result;
+            if (post.Title.IndexOf("snake", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+            if (post.Title.IndexOf("snek", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+            if (post.Title.IndexOf("noodle", StringComparison.OrdinalIgnoreCase)>= 0) return false;
+            else return true;
         }
 
         private static string ParsePostsIntoEmailBody(List<Post> list, int awwCount)
@@ -76,19 +87,59 @@ namespace DailyAww.Services
         private static List<Post> GetManualAww()
         {
             var result = new List<Post>();
-            //            var url = WebConfigurationManager.AppSettings["ManualAwwUrl"];
-            //            var web = new HtmlWeb();
-            //            var doc = web.Load(url);
-            //            var nodes = doc.DocumentNode.SelectNodes("//a")
-            //                .Where(n => n.InnerText.Contains("Parent Directory") == false);
-            //            if (nodes.Any())
-            //                result.AddRange(nodes.Select(htmlNode => new Post
-            //                {
-            //                    Title = htmlNode.InnerText,
-            //                    Url = new Uri(url + htmlNode.Attributes["href"].Value)
-            //                }));
+            //var url = WebConfigurationManager.AppSettings["ManualAwwUrl"];
+            //var web = new HtmlWeb();
+            //var doc = web.Load(url);
+            //var nodes = doc.DocumentNode.SelectNodes("//a")
+            //    .Where(n => n.InnerText.Contains("Parent Directory") == false);
+            //if (nodes.Any())
+            //    result.AddRange(nodes.Select(htmlNode => new Post
+            //    {
+            //        Title = htmlNode.InnerText,
+            //        Url = new Uri(url + htmlNode.Attributes["href"].Value)
+            //    }));
 
             return result;
+        }
+
+
+        static string MakeRequest(string url)
+        {
+            //var cflient = new HttpClient();
+            //cflient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "5f02fb70e86244879c529dd39157a348");
+
+            //object data = new
+            //{
+            //    url
+            //};
+            //var myContent = JsonConvert.SerializeObject(data);
+            //var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
+            //var byteContent = new ByteArrayContent(buffer);
+            //byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            //var fresponse = cflient.PostAsync("https://southcentralus.api.cognitive.microsoft.com/vision/v1.0/tag", byteContent).Result;
+
+
+
+            var client = new HttpClient();
+            var queryString = HttpUtility.ParseQueryString(string.Empty);
+
+            // Request headers
+            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "5f02fb70e86244879c529dd39157a348");
+
+            var uri = "https://southcentralus.api.cognitive.microsoft.com/vision/v1.0/tag?" + queryString;
+
+            HttpResponseMessage response;
+
+            // Request body
+            byte[] byteData = Encoding.UTF8.GetBytes("\"url\":\"" + url + "\"");
+
+            using (var content = new ByteArrayContent(byteData))
+            {
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                response = client.PostAsync(uri, content).Result;
+            }
+            client.Dispose();
+            return response.Content.ToString();
         }
     }
 }

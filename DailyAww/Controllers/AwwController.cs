@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -16,9 +18,11 @@ namespace DailyAww.Controllers
         private readonly IAwwService _aww;
         private readonly ICommunicationService _comm;
         private readonly IContextService _context;
+        private readonly string _adminEmail;
 
         public AwwController(IContextService contextService, IAwwService awwService, ICommunicationService commsService)
         {
+            _adminEmail = ConfigurationManager.AppSettings["AdminEmail"];
             _context = contextService;
             _aww = awwService;
             _comm = commsService;
@@ -28,8 +32,9 @@ namespace DailyAww.Controllers
         [Authorize]
         public ActionResult Index()
         {
-            var model = new OnDemandAwwViewModel();
-            model.ModelList = _context.GetAllPeople()
+            var model = new OnDemandAwwViewModel
+            {
+                ModelList = _context.GetAllPeople()
                 .Select(x => new OnDemandListItem
                 {
                     Selected = false,
@@ -62,19 +67,45 @@ namespace DailyAww.Controllers
         [HttpPost]
         public void DailyAwws()
         {
-            var people = _context.GetAllPeople();
-            var emailBody = _aww.GetAwws(FromTime.Day);
-            var subject = "Awwws for " + DateTime.Today.Date.ToShortDateString();
-            _comm.SendAwws(emailBody, subject, people);
+            List<Person> people = new List<Person>();
+            string emailBody = "";
+            string subject = "";
+            try
+            {
+                people = _context.GetAllPeople();
+                emailBody = _aww.GetDailyAwws();
+                subject = "Awwws for " + DateTime.Today.Date.ToShortDateString();
+            }
+            catch (Exception ex)
+            {
+                _comm.SendAwws(ex.Message, "Daily Aww Failed", new MailAddress(_adminEmail));
+            }
+            finally
+            {
+                _comm.SendAwws(emailBody, subject, people);
+            }
         }
 
         [HttpPost]
         public void WeeklyAwws()
         {
-            var people = _context.GetAllPeople();
-            var emailBody = _aww.GetAwws(FromTime.Week);
-            var subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
-            _comm.SendAwws(emailBody, subject, people);
+            List<Person> people = new List<Person>();
+            string emailBody = "";
+            string subject = "";
+            try
+            {
+                people = _context.GetAllPeople();
+                emailBody = _aww.GetWeeklyAwws();
+                subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
+            }
+            catch (Exception ex)
+            {
+                _comm.SendAwws(ex.Message, "Weekly Aww Failed", new MailAddress(_adminEmail));
+            }
+            finally
+            {
+                _comm.SendAwws(emailBody, subject, people);
+            }
         }
 
         [HttpPost]
@@ -82,8 +113,9 @@ namespace DailyAww.Controllers
         {
             try
             {
-                var emailbody = _aww.GetAwws(FromTime.Week);
-                _comm.SendAwws(emailbody, "Test Aww Message: " + Guid.NewGuid(), new MailAddress(WebConfigurationManager.AppSettings["TestEmail"]));
+
+                var emailbody = _aww.GetHourlyAwws();
+                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress(_adminEmail));
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
             catch (Exception ex)
