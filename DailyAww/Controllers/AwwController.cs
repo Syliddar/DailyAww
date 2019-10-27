@@ -40,7 +40,8 @@ namespace DailyAww.Controllers
                     Selected = false,
                     PersonId = x.Id,
                     PersonName = x.Name
-                }).ToList();
+                }).ToList()
+            };
             return View(model);
         }
 
@@ -73,7 +74,7 @@ namespace DailyAww.Controllers
             try
             {
                 people = _context.GetAllPeople();
-                emailBody = _aww.GetDailyAwws();
+                emailBody = _aww.GetAwws(FromTime.Day);
                 subject = "Awwws for " + DateTime.Today.Date.ToShortDateString();
             }
             catch (Exception ex)
@@ -95,7 +96,7 @@ namespace DailyAww.Controllers
             try
             {
                 people = _context.GetAllPeople();
-                emailBody = _aww.GetWeeklyAwws();
+                emailBody = _aww.GetAwws(FromTime.Week);
                 subject = "Saturday Edition Aww's for the week of " + DateTime.Today.AddDays(-6).ToShortDateString();
             }
             catch (Exception ex)
@@ -114,7 +115,7 @@ namespace DailyAww.Controllers
             try
             {
 
-                var emailbody = _aww.GetHourlyAwws();
+                var emailbody = _aww.GetAwws(FromTime.Hour);
                 _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress(_adminEmail));
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             }

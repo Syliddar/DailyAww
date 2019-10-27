@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Net.Http;
 using System.Web;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web.Configuration;
 using DailyAww.Interfaces;
-using HtmlAgilityPack;
 using RedditSharp;
 using RedditSharp.Things;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Text;
 
 namespace DailyAww.Services
 {
@@ -44,7 +37,6 @@ namespace DailyAww.Services
             var result = new List<Post>();
             foreach (var post in list)
             {
-                if (!IsAcceptableFileType(post)) continue;
                 if (PassesCuteFilterAsync(post)) result.Add(post);
             }
 
@@ -103,43 +95,43 @@ namespace DailyAww.Services
         }
 
 
-        static string MakeRequest(string url)
-        {
-            //var cflient = new HttpClient();
-            //cflient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "5f02fb70e86244879c529dd39157a348");
+        //static string MakeRequest(string url)
+        //{
+        //    //var cflient = new HttpClient();
+        //    //cflient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "5f02fb70e86244879c529dd39157a348");
 
-            //object data = new
-            //{
-            //    url
-            //};
-            //var myContent = JsonConvert.SerializeObject(data);
-            //var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
-            //var byteContent = new ByteArrayContent(buffer);
-            //byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            //var fresponse = cflient.PostAsync("https://southcentralus.api.cognitive.microsoft.com/vision/v1.0/tag", byteContent).Result;
+        //    //object data = new
+        //    //{
+        //    //    url
+        //    //};
+        //    //var myContent = JsonConvert.SerializeObject(data);
+        //    //var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
+        //    //var byteContent = new ByteArrayContent(buffer);
+        //    //byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        //    //var fresponse = cflient.PostAsync("https://southcentralus.api.cognitive.microsoft.com/vision/v1.0/tag", byteContent).Result;
 
 
 
-            var client = new HttpClient();
-            var queryString = HttpUtility.ParseQueryString(string.Empty);
+        //    var client = new HttpClient();
+        //    var queryString = HttpUtility.ParseQueryString(string.Empty);
 
-            // Request headers
-            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "5f02fb70e86244879c529dd39157a348");
+        //    // Request headers
+        //    client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "5f02fb70e86244879c529dd39157a348");
 
-            var uri = "https://southcentralus.api.cognitive.microsoft.com/vision/v1.0/tag?" + queryString;
+        //    var uri = "https://southcentralus.api.cognitive.microsoft.com/vision/v1.0/tag?" + queryString;
 
-            HttpResponseMessage response;
+        //    HttpResponseMessage response;
 
-            // Request body
-            byte[] byteData = Encoding.UTF8.GetBytes("\"url\":\"" + url + "\"");
+        //    // Request body
+        //    byte[] byteData = Encoding.UTF8.GetBytes("\"url\":\"" + url + "\"");
 
-            using (var content = new ByteArrayContent(byteData))
-            {
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                response = client.PostAsync(uri, content).Result;
-            }
-            client.Dispose();
-            return response.Content.ToString();
-        }
+        //    using (var content = new ByteArrayContent(byteData))
+        //    {
+        //        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        //        response = client.PostAsync(uri, content).Result;
+        //    }
+        //    client.Dispose();
+        //    return response.Content.ToString();
+        //}
     }
 }
