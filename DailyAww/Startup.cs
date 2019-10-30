@@ -1,27 +1,16 @@
-﻿using System;
-using System.Diagnostics;
-using Hangfire;
-using Microsoft.Owin;
+﻿using Microsoft.Owin;
 using Owin;
+using System.Web.Http;
 
-[assembly: OwinStartupAttribute(typeof(DailyAww.Startup))]
+[assembly: OwinStartup(typeof(DailyAww.Startup))]
 namespace DailyAww
 {
     public partial class Startup
     {
         public void Configuration(IAppBuilder app)
         {
-            GlobalConfiguration.Configuration
-               .UseSqlServerStorage(
-                System.Web.Configuration.WebConfigurationManager.ConnectionStrings["DefaultConnection"].ToString()
-                );
-
-            app.UseHangfireDashboard();
-            app.UseHangfireServer();
-            
+            //GlobalConfiguration.Configuration.sql.UseSqlServerStorage(System.Web.Configuration.WebConfigurationManager.ConnectionStrings["DefaultConnection"].ToString());
             ConfigureAuth(app);
-
-            
         }
     }
 }
