@@ -2,6 +2,7 @@
 using DailyAww.Interfaces;
 using DailyAww.Models;
 using Hangfire;
+using RedditSharp.Things;
 
 namespace DailyAww.Controllers
 {
@@ -26,13 +27,13 @@ namespace DailyAww.Controllers
             switch (viewModel.AwwType)
             {
                 case AwwTypes.HourlyAwws:
-                    RecurringJob.AddOrUpdate(() => _aww.GetHourlyAwws(), viewModel.CronExpression, viewModel.TimeZoneInfo);
+                    RecurringJob.AddOrUpdate(() => _aww.GetAwws(FromTime.Hour), viewModel.CronExpression, viewModel.TimeZoneInfo);
                     break;
                 case AwwTypes.DailyAwws:
-                    RecurringJob.AddOrUpdate(() => _aww.GetDailyAwws(), viewModel.CronExpression, viewModel.TimeZoneInfo);
+                    RecurringJob.AddOrUpdate(() => _aww.GetAwws(FromTime.Day), viewModel.CronExpression, viewModel.TimeZoneInfo);
                     break;
                 case AwwTypes.WeeklyAwws:
-                    RecurringJob.AddOrUpdate(() => _aww.GetWeeklyAwws(), viewModel.CronExpression, viewModel.TimeZoneInfo);
+                    RecurringJob.AddOrUpdate(() => _aww.GetAwws(FromTime.Week), viewModel.CronExpression, viewModel.TimeZoneInfo);
                     break;
             }
             return View("Index");

@@ -11,17 +11,17 @@ namespace DailyAww.Services
     public class CommunicationService : ICommunicationService
     {
         private readonly IContextService _context;
-        private readonly string _serviceAddress;
-        private readonly string _serviceClient;
+        private readonly string _serviceEmailAddress;
+        private readonly string _serviceHost;
         private readonly string _servicePassword;
         private readonly int _servicePort;
 
         public CommunicationService(IContextService context)
         {
             _context = context;
-            _serviceAddress = ConfigurationManager.AppSettings["ServiceAddress"];
+            _serviceEmailAddress = ConfigurationManager.AppSettings["ServiceEmailAddress"];
             _servicePassword = ConfigurationManager.AppSettings["ServicePassword"];
-            _serviceClient = ConfigurationManager.AppSettings["ServiceClient"];
+            _serviceHost = ConfigurationManager.AppSettings["ServiceHost"];
             _servicePort = Convert.ToInt32(ConfigurationManager.AppSettings["ServicePort"]);
         }
 
@@ -29,12 +29,12 @@ namespace DailyAww.Services
         {
             var awwMail = new MailMessage
             {
-                From = new MailAddress(_serviceAddress),
+                From = new MailAddress(_serviceEmailAddress),
                 Body = message,
                 Subject = subject,
                 IsBodyHtml = true
             };
-            foreach (var person in peopleList) awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
+            foreach (var person in peopleList) awwMail.Bcc.Add(new MailAddress(person.EmailAddress, person.Name));
             SmtpClientSend(awwMail);
         }
 
@@ -42,7 +42,7 @@ namespace DailyAww.Services
         {
             var awwMail = new MailMessage
             {
-                From = new MailAddress(_serviceAddress),
+                From = new MailAddress(_serviceEmailAddress),
                 Body = message,
                 Subject = subject,
                 IsBodyHtml = true
@@ -56,23 +56,25 @@ namespace DailyAww.Services
             var personList = _context.GetPeople(personIdList);
             var awwMail = new MailMessage
             {
-                From = new MailAddress(_serviceAddress),
+                From = new MailAddress(_serviceEmailAddress),
                 Body = message,
                 Subject = subject,
                 IsBodyHtml = true
             };
-            foreach (var person in personList) awwMail.To.Add(new MailAddress(person.EmailAddress, person.Name));
+            foreach (var person in personList) awwMail.Bcc.Add(new MailAddress(person.EmailAddress, person.Name));
             SmtpClientSend(awwMail);
         }
 
         private void SmtpClientSend(MailMessage awwMail)
         {
-            var client = new SmtpClient(_serviceClient, _servicePort)
+            using (var client = new SmtpClient(_serviceHost, _servicePort))
             {
-                Credentials = new NetworkCredential(_serviceAddress, _servicePassword),
-                EnableSsl = true
-            };
-            client.Send(awwMail);
+                client.UseDefaultCredentials = false;
+                client.EnableSsl = true;
+                client.Credentials = new NetworkCredential(_serviceEmailAddress, _servicePassword, "miamemphis.org");
+                client.Timeout = 20000;
+                client.Send(awwMail);
+            }
         }
     }
 }

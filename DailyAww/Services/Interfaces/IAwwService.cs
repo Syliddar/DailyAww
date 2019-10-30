@@ -1,9 +1,9 @@
-﻿namespace DailyAww.Interfaces
+﻿using RedditSharp.Things;
+
+namespace DailyAww.Interfaces
 {
     public interface IAwwService
     {
-        string GetDailyAwws();
-        string GetHourlyAwws();
-        string GetWeeklyAwws();
+        string GetAwws(FromTime fromTime);
     }
 }
