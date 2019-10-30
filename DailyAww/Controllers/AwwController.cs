@@ -4,10 +4,10 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Web.Configuration;
 using System.Web.Mvc;
 using DailyAww.Interfaces;
 using DailyAww.Models;
+using DailyAww.Services;
 using DailyAww.Services.Interfaces;
 using RedditSharp.Things;
 
@@ -19,6 +19,7 @@ namespace DailyAww.Controllers
         private readonly ICommunicationService _comm;
         private readonly IContextService _context;
         private readonly string _adminEmail;
+        
 
         public AwwController(IContextService contextService, IAwwService awwService, ICommunicationService commsService)
         {
@@ -110,13 +111,13 @@ namespace DailyAww.Controllers
         }
 
         [HttpPost]
+        [Awwthorization]
         public HttpStatusCodeResult Test()
         {
             try
             {
-
                 var emailbody = _aww.GetAwws(FromTime.Hour);
-                _comm.SendAwws(emailbody, "Test Aww Message", new MailAddress(_adminEmail));
+                //_comm.SendAwws(emailbody, "Test Aww Message", new MailAddress(_adminEmail));
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
             catch (Exception ex)
